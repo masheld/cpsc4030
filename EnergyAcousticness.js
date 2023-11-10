@@ -66,13 +66,14 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
                       .attr("r", 3)
                       .attr("fill", function(d) {return "steelblue"}) //color(d.AcousticnessPercent)
-                      .attr("stroke", function(d) {
-                            var r = "steelblue" //color(d.AcousticnessPercent)
-                            r = d3.hsl(r)
-                            r.l = .75
-                            return r
-                        })
-                      .attr("stroke-width", 1)
+                      .attr("fill-opacity", "0.25")
+                    //   .attr("stroke", function(d) {
+                    //         var r = "steelblue" //color(d.AcousticnessPercent)
+                    //         r = d3.hsl(r)
+                    //         r.l = .75
+                    //         return r
+                    //     })
+                    //   .attr("stroke-width", 1)
 
         dots = svg.append("g")
                       .selectAll("circle")
@@ -83,13 +84,14 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
                       .attr("r", 3)
                       .attr("fill", "orange")
-                      .attr("stroke", function(d) {
-                            var r = "orange" 
-                            r = d3.hsl(r)
-                            r.l = .40
-                            return r
-                        })
-                      .attr("stroke-width", 1)
+                      .attr("fill-opacity", "0.25")
+                    //   .attr("stroke", function(d) {
+                    //         var r = "orange" 
+                    //         r = d3.hsl(r)
+                    //         r.l = .40
+                    //         return r
+                    //     })
+                    //   .attr("stroke-width", 1)
 
         dots = svg.append("g")
                       .selectAll("circle")
@@ -100,14 +102,15 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
                       .attr("r", 3)
                       .attr("fill", "green")
-                      .attr("stroke", "black")
+                      .attr("fill-opacity", "0.25")
+                    //   .attr("stroke", "black")
                     //   .attr("stroke", function(d) {
                     //         var r = "green" 
                     //         r = d3.hsl(r)
                     //         r.l = .35
                     //         return r
                     //     })
-                      .attr("stroke-width", 1)
+                    //   .attr("stroke-width", 1)
 
         dots = svg.append("g")
                       .selectAll("circle")
@@ -118,13 +121,14 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
                       .attr("r", 3)
                       .attr("fill", "red")
-                      .attr("stroke", function(d) {
-                            var r = "red" 
-                            r = d3.hsl(r)
-                            r.l = .40
-                            return r
-                        })
-                      .attr("stroke-width", 1)
+                      .attr("fill-opacity", "0.25")
+                    //   .attr("stroke", function(d) {
+                    //         var r = "red" 
+                    //         r = d3.hsl(r)
+                    //         r.l = .40
+                    //         return r
+                    //     })
+                    //   .attr("stroke-width", 1)
 
         dots = svg.append("g")
                       .selectAll("circle")
@@ -135,14 +139,15 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
                       .attr("r", 3)
                       .attr("fill", "purple")
-                      .attr("stroke", "black")
+                      .attr("fill-opacity", "0.25")
+                    //   .attr("stroke", "black")
                     //   .attr("stroke", function(d) {
                     //         var r = "purple" 
                     //         r = d3.hsl(r)
                     //         r.l = .75
                     //         return r
                     //     })
-                      .attr("stroke-width", 1)
+                    //   .attr("stroke-width", 1)
 
         var xAxisGen = d3.axisBottom().scale(xScale)
         var xAxis = svg.append("g")
