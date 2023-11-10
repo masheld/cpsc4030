@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+    <script>
+        // Define the dimensions and margins for the heatmap
+        const margin = {
+            top: 50,
+            right: 50,
+            bottom: 50,
+            left: 50
+        };
+        const width = 800 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        // Append an SVG element to the body
+        const svg = d3
+            .select('body')
+            .append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        // Load the CSV data
+        d3.csv('v3.csv').then((data) => {
+            // Extract unique genres and years from the data
+            const genres = Array.from(new Set(data.map((d) => d.Genre)));
+            const years = Array.from(new Set(data.map((d) => d.Year)));
+
+            // Sort the years in ascending order
+            years.sort((a, b) => b - a);
+
+            // Create scales for the x and y axes
+            const xScale = d3.scaleBand().domain(genres).range([0, width]);
+            const yScale = d3.scaleBand().domain(years.map(String)).range([0, height]);
+
+            // Create a color scale for the heatmap color (from light blue to dark blue)
+            const colorScale = d3.scaleSequential(d3.interpolateBlues).domain([0, d3.max(data, (d) => +d.Stream)]);
+
+            // Create the heatmap rectangles
+            svg
+                .selectAll('rect')
+                .data(data)
+                .enter()
+                .append('rect')
+                .attr('x', (d) => xScale(d.Genre))
+                .attr('y', (d) => yScale(String(d.Year)))
+                .attr('width', xScale.bandwidth())
+                .attr('height', yScale.bandwidth())
+                .style('fill', (d) => colorScale(+d.Stream));
+
+            // Create the x-axis label
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + margin.top)
+                .style('text-anchor', 'middle')
+                .text('Genre');
+
+            // Create the y-axis label
+            svg.append('text')
+                .attr('x', 0)
+                .attr('y', -margin.top / 2)
+                .style('text-anchor', 'middle')
+                .text('Year');
+
+            // Create the x-axis
+            svg
+                .append('g')
+                .attr('transform', `translate(0, ${height})`)
+                .call(d3.axisBottom(xScale));
+
+            // Create the y-axis with ticks for every 5 years
+            const tickValues = years.filter((year) => year % 5 === 0).map(String);
+            svg.append('g').call(d3.axisLeft(yScale).tickValues(tickValues));
+        });
+    </script>
+</body>
+
+</html>
