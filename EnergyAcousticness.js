@@ -2,8 +2,8 @@ d3.csv("condensedGenresFixed.csv").then(
     function(dataset) {
 
         var dimensions = {
-            width: 1600,
-            height: 800,
+            width: 800,
+            height: 400,
             margin:{
                 top: 10,
                 bottom: 50,
@@ -26,28 +26,45 @@ d3.csv("condensedGenresFixed.csv").then(
                     .style("height", dimensions.height)
 
         var spacer = 20
-        var funcWidth = dimensions.width - (dimensions.margin.left + dimensions.margin.right + (spacer*4))
+        var funcWidth = dimensions.width - (dimensions.margin.left + dimensions.margin.right)
         
+        // graphNum refers to the order of the graphs (1-5)
+        // endpoint refers to which endpoint of the range the value is (1=lower, 2=upper)
+        function calcAxisWidth(graphNum, endpoint) {
+            if (endpoint == 1)
+                return (dimensions.width/5)*graphNum
+            else if (endpoint == 2)
+                return ((dimensions.width/5)*graphNum) - (spacer)
+        }
+
+        function calcLabelX(graphNum, endpoint) {
+            // if (endpoint == 1)
+            //     return (dimensions.width/5)*graphNum
+            // else if (endpoint == 2)
+                return ((funcWidth/5)*graphNum) - (funcWidth/10)
+
+        }
 
         var xScale = d3.scaleLinear()
                        .domain([0,1])//d3.extent(dataset, acousticAccessor))  // Interval of values
-                       .range([dimensions.margin.left, funcWidth/5])   // Place of value on screen?
+                    //    .range([dimensions.margin.left, funcWidth/5])   // Place of value on screen?
+                        .range([dimensions.margin.left, calcAxisWidth(1, 2)])
 
         var danceScale = d3.scaleLinear()
                         .domain([0,1])//d3.extent(dataset, danceAccessor))  // Interval of values
-                        .range([(funcWidth/5) +spacer, 2*(funcWidth/5)])
+                        .range([calcAxisWidth(1, 1), calcAxisWidth(2, 2)])
 
         var valenceScale = d3.scaleLinear()
                         .domain([0,1])//d3.extent(dataset, valenceAccessor))  // Interval of values
-                        .range([(2*(funcWidth/5))+spacer, 3*(funcWidth/5)])
+                        .range([calcAxisWidth(2, 1), calcAxisWidth(3, 2)])
 
         var speechScale = d3.scaleLinear()
                         .domain([0,1])//d3.extent(dataset, speechAccessor))  // Interval of values
-                        .range([(3*(funcWidth/5)) +spacer, 4*(funcWidth/5)])
+                        .range([calcAxisWidth(3, 1), calcAxisWidth(4, 2)])
 
         var liveScale = d3.scaleLinear()
                         .domain([0,1])//d3.extent(dataset, liveAccessor))  // Interval of values
-                        .range([(4*(funcWidth/5)) +spacer, funcWidth])
+                        .range([calcAxisWidth(4, 1), calcAxisWidth(5, 2)])
 
 
         var yScale = d3.scaleLinear()
@@ -182,36 +199,36 @@ d3.csv("condensedGenresFixed.csv").then(
         svg.append("text")
             .attr("class", "x label")
             // .attr("text-anchor", "end")
-            .attr("x", funcWidth/10)
+            .attr("x", calcLabelX(1, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .text("Acousticness");
         
         svg.append("text")
             .attr("class", "x label")
-            .attr("x", 400)
+            .attr("x", calcLabelX(2, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .text("Danceability");
 
         svg.append("text")
             .attr("class", "x label")
-            .attr("x", 718)
+            .attr("x", calcLabelX(3, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .text("Valence");
 
-
         svg.append("text")
             .attr("class", "x label")
-            .attr("x", 990)
+            .attr("x", calcLabelX(4, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .text("Speechiness");
 
+        console.log(calcAxisWidth(5, 2))
         svg.append("text")
             .attr("class", "x label")
-            .attr("x", 1300)
+            .attr("x", calcLabelX(5, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .text("Liveness");
