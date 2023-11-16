@@ -32,23 +32,20 @@ d3.csv("condensedGenresFixed.csv").then(
         // endpoint refers to which endpoint of the range the value is (1=lower, 2=upper)
         function calcAxisWidth(graphNum, endpoint) {
             if (endpoint == 1)
-                return (dimensions.width/5)*graphNum
+                return ((funcWidth/5)*graphNum)+dimensions.margin.left
             else if (endpoint == 2)
-                return ((dimensions.width/5)*graphNum) - (spacer)
+                return (((funcWidth/5)*graphNum) - (spacer)) + dimensions.margin.left
         }
 
-        function calcLabelX(graphNum, endpoint) {
-            // if (endpoint == 1)
-            //     return (dimensions.width/5)*graphNum
-            // else if (endpoint == 2)
-                return ((funcWidth/5)*graphNum) - (funcWidth/10)
-
+        function calcLabelX(graphNum) {
+                return calcAxisWidth(graphNum, 1) - (funcWidth/10)
         }
 
         var xScale = d3.scaleLinear()
                        .domain([0,1])//d3.extent(dataset, acousticAccessor))  // Interval of values
                     //    .range([dimensions.margin.left, funcWidth/5])   // Place of value on screen?
                         .range([dimensions.margin.left, calcAxisWidth(1, 2)])
+
 
         var danceScale = d3.scaleLinear()
                         .domain([0,1])//d3.extent(dataset, danceAccessor))  // Interval of values
@@ -74,6 +71,14 @@ d3.csv("condensedGenresFixed.csv").then(
         var interp = d3.interpolate("navy", "white")
         var color = d3.scaleSequential(interp).domain([0,1])
 
+        // for(graphNum) {
+        //     append ...
+        //     if(graphNum=1)
+        // }
+
+        let opacity = 0.25
+        let radius = 3
+    
         var dots = svg.append("g")
                       .selectAll("circle")
                       .data(dataset)
@@ -81,16 +86,9 @@ d3.csv("condensedGenresFixed.csv").then(
                       .append("circle")
                       .attr("cx", d => xScale(acousticAccessor(d)))  // each scale function will return the pixel
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
-                      .attr("r", 3)
-                      .attr("fill", function(d) {return "steelblue"}) //color(d.AcousticnessPercent)
-                      .attr("fill-opacity", "0.25")
-                    //   .attr("stroke", function(d) {
-                    //         var r = "steelblue" //color(d.AcousticnessPercent)
-                    //         r = d3.hsl(r)
-                    //         r.l = .75
-                    //         return r
-                    //     })
-                    //   .attr("stroke-width", 1)
+                      .attr("r", radius)
+                      .attr("fill", "steelblue")
+                      .attr("fill-opacity", opacity)
 
         dots = svg.append("g")
                       .selectAll("circle")
@@ -99,16 +97,9 @@ d3.csv("condensedGenresFixed.csv").then(
                       .append("circle")
                       .attr("cx", d => danceScale(danceAccessor(d)))  // each scale function will return the pixel
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
-                      .attr("r", 3)
+                      .attr("r", radius)
                       .attr("fill", "orange")
-                      .attr("fill-opacity", "0.25")
-                    //   .attr("stroke", function(d) {
-                    //         var r = "orange" 
-                    //         r = d3.hsl(r)
-                    //         r.l = .40
-                    //         return r
-                    //     })
-                    //   .attr("stroke-width", 1)
+                      .attr("fill-opacity", opacity)
 
         dots = svg.append("g")
                       .selectAll("circle")
@@ -117,17 +108,9 @@ d3.csv("condensedGenresFixed.csv").then(
                       .append("circle")
                       .attr("cx", d => valenceScale(valenceAccessor(d)))  // each scale function will return the pixel
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
-                      .attr("r", 3)
+                      .attr("r", radius)
                       .attr("fill", "green")
-                      .attr("fill-opacity", "0.25")
-                    //   .attr("stroke", "black")
-                    //   .attr("stroke", function(d) {
-                    //         var r = "green" 
-                    //         r = d3.hsl(r)
-                    //         r.l = .35
-                    //         return r
-                    //     })
-                    //   .attr("stroke-width", 1)
+                      .attr("fill-opacity", opacity)
 
         dots = svg.append("g")
                       .selectAll("circle")
@@ -136,16 +119,9 @@ d3.csv("condensedGenresFixed.csv").then(
                       .append("circle")
                       .attr("cx", d => speechScale(speechAccessor(d)))  // each scale function will return the pixel
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
-                      .attr("r", 3)
+                      .attr("r", radius)
                       .attr("fill", "red")
-                      .attr("fill-opacity", "0.25")
-                    //   .attr("stroke", function(d) {
-                    //         var r = "red" 
-                    //         r = d3.hsl(r)
-                    //         r.l = .40
-                    //         return r
-                    //     })
-                    //   .attr("stroke-width", 1)
+                      .attr("fill-opacity", opacity)
 
         dots = svg.append("g")
                       .selectAll("circle")
@@ -154,17 +130,9 @@ d3.csv("condensedGenresFixed.csv").then(
                       .append("circle")
                       .attr("cx", d => liveScale(liveAccessor(d)))  // each scale function will return the pixel
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
-                      .attr("r", 3)
+                      .attr("r", radius)
                       .attr("fill", "purple")
-                      .attr("fill-opacity", "0.25")
-                    //   .attr("stroke", "black")
-                    //   .attr("stroke", function(d) {
-                    //         var r = "purple" 
-                    //         r = d3.hsl(r)
-                    //         r.l = .75
-                    //         return r
-                    //     })
-                    //   .attr("stroke-width", 1)
+                      .attr("fill-opacity", opacity)
 
         var xAxisGen = d3.axisBottom().scale(xScale)
         var xAxis = svg.append("g")
@@ -198,10 +166,10 @@ d3.csv("condensedGenresFixed.csv").then(
 
         svg.append("text")
             .attr("class", "x label")
-            // .attr("text-anchor", "end")
             .attr("x", calcLabelX(1, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
+            .attr("text-anchor", "middle")
             .text("Acousticness");
         
         svg.append("text")
@@ -209,6 +177,7 @@ d3.csv("condensedGenresFixed.csv").then(
             .attr("x", calcLabelX(2, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
+            .attr("text-anchor", "middle")
             .text("Danceability");
 
         svg.append("text")
@@ -216,6 +185,7 @@ d3.csv("condensedGenresFixed.csv").then(
             .attr("x", calcLabelX(3, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
+            .attr("text-anchor", "middle")
             .text("Valence");
 
         svg.append("text")
@@ -223,17 +193,51 @@ d3.csv("condensedGenresFixed.csv").then(
             .attr("x", calcLabelX(4, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
+            .attr("text-anchor", "middle")
             .text("Speechiness");
 
-        console.log(calcAxisWidth(5, 2))
         svg.append("text")
             .attr("class", "x label")
             .attr("x", calcLabelX(5, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
+            .attr("text-anchor", "middle")
             .text("Liveness");
 
-        // svg.append("text")
+        
+        d3.selectAll('circle').on('mouseover', (d,i) => {
+            d3.select(d.srcElement).style('stroke', 'black')
+            d3.select(d.srcElement).style('stroke-width', 1.25)
+        })
+    
+        d3.selectAll('circle').on('mouseout', (d,i) => {
+            d3.select(d.srcElement).style('stroke-width', 0)
+        })
+
+        d3.selectAll('circle').on('click', (d, i) => {
+            const clickedCircle = d3.select(d.srcElement);
+            const currentOpacity = parseFloat(clickedCircle.style('fill-opacity'));
+            
+            if (currentOpacity < 1.0) {
+                // Set all circle opacities to 0.1
+                d3.selectAll('circle').style("fill-opacity", "0.1");
+                // Set the clicked circle's opacity to 1.0
+                clickedCircle.style('fill-opacity', "1.0");
+            } else {
+                // Reset all circle opacities to their original value (e.g., 1.0)
+                d3.selectAll('circle').style("fill-opacity", opacity);
+            }
+        });
+
+    }
+)
+
+
+
+
+
+
+// svg.append("text")
         //     .attr("class", "y label")
         //     // .attr("text-anchor", "end")
         //     .attr("x", 105)
@@ -242,5 +246,43 @@ d3.csv("condensedGenresFixed.csv").then(
         //     .attr("transform", "rotate(-90)")
         //     .style("fill", "black")
         //     .text("Energy");
-    }
-)
+
+    // selection.call(d3.zoom().on("zoom", zoomed));
+
+    // let zoom = d3.zoom()
+	// .on('zoom', handleZoom);
+
+    // function handleZoom(e) {
+    //     d3.select('svg g')
+    //         .attr('transform', e.transform);
+    // }
+
+    // function initZoom() {
+    //     d3.select('svg')
+    //         .call(zoom);
+    // }
+
+    // function updateData() {
+    //     data = [];
+    //     for(let i=0; i<numPoints; i++) {
+    //         data.push({
+    //             id: i,
+    //             x: Math.random() * dimensions.width,
+    //             y: Math.random() * dimensions.height
+    //         });
+    //     }
+    // }
+    
+    // function update() {
+    //     d3.select('svg g')
+    //         .selectAll('circle')
+    //         .data(dataset)
+    //         .join('circle')
+    //         .attr('cx', function(d) { return d.x; })
+    //         .attr('cy', function(d) { return d.y; })
+    //         .attr('r', 3);
+    // }
+
+    // initZoom();
+    // updateData();
+    // update();
