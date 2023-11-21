@@ -41,10 +41,10 @@ d3.csv("condensedGenresFixed.csv").then(
                 return calcAxisWidth(graphNum, 1) - (funcWidth/10)
         }
 
-        var xScale = d3.scaleLinear()
+
+        var acousticScale = d3.scaleLinear()
                        .domain([0,1])//d3.extent(dataset, acousticAccessor))  // Interval of values
-                    //    .range([dimensions.margin.left, funcWidth/5])   // Place of value on screen?
-                        .range([dimensions.margin.left, calcAxisWidth(1, 2)])
+                       .range([dimensions.margin.left, calcAxisWidth(1, 2)])
 
 
         var danceScale = d3.scaleLinear()
@@ -67,30 +67,28 @@ d3.csv("condensedGenresFixed.csv").then(
         var yScale = d3.scaleLinear()
                        .domain(d3.extent(dataset, yAccessor))
                        .range([dimensions.height-dimensions.margin.bottom, dimensions.margin.top]) 
-        
-        var interp = d3.interpolate("navy", "white")
-        var color = d3.scaleSequential(interp).domain([0,1])
 
         // for(graphNum) {
         //     append ...
         //     if(graphNum=1)
         // }
 
-        let opacity = 0.25
+        let opacity = 0.15
         let radius = 3
     
-        var dots = svg.append("g")
+        var acousticDots = svg.append("g")
                       .selectAll("circle")
                       .data(dataset)
                       .enter()
                       .append("circle")
-                      .attr("cx", d => xScale(acousticAccessor(d)))  // each scale function will return the pixel
+                      .attr("cx", d => acousticScale(acousticAccessor(d)))  // each scale function will return the pixel
                       .attr("cy", d => yScale(yAccessor(d)))  // that each attribute must be printed at
                       .attr("r", radius)
                       .attr("fill", "steelblue")
                       .attr("fill-opacity", opacity)
+                      .attr("class", "acousticGraph")
 
-        dots = svg.append("g")
+        var danceDots = svg.append("g")
                       .selectAll("circle")
                       .data(dataset)
                       .enter()
@@ -100,8 +98,9 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("r", radius)
                       .attr("fill", "orange")
                       .attr("fill-opacity", opacity)
+                      .attr("class", "danceGraph")
 
-        dots = svg.append("g")
+        var valenceDots = svg.append("g")
                       .selectAll("circle")
                       .data(dataset)
                       .enter()
@@ -111,8 +110,9 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("r", radius)
                       .attr("fill", "green")
                       .attr("fill-opacity", opacity)
+                      .attr("class", "valenceGraph")
 
-        dots = svg.append("g")
+        var speechDots = svg.append("g")
                       .selectAll("circle")
                       .data(dataset)
                       .enter()
@@ -122,8 +122,9 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("r", radius)
                       .attr("fill", "red")
                       .attr("fill-opacity", opacity)
+                      .attr("class", "speechGraph")
 
-        dots = svg.append("g")
+        var liveDots = svg.append("g")
                       .selectAll("circle")
                       .data(dataset)
                       .enter()
@@ -133,31 +134,42 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("r", radius)
                       .attr("fill", "purple")
                       .attr("fill-opacity", opacity)
+                      .attr("class", "liveGraph")
 
-        var xAxisGen = d3.axisBottom().scale(xScale)
+        var xAxisGen = d3.axisBottom().scale(acousticScale)
         var xAxis = svg.append("g")
                        .call(xAxisGen)
                        .style("transform", `translateY(${dimensions.height-dimensions.margin.bottom}px)`)
+                       .attr("class", "x_axis acousticGraph")
+                       .attr("id", "acousticGraph")
 
         var danceAxisGen = d3.axisBottom().scale(danceScale)
-        xAxis = svg.append("g")
+        var xAxis2 = svg.append("g")
                        .call(danceAxisGen)
                        .style("transform", `translateY(${dimensions.height-dimensions.margin.bottom}px)`)
+                       .attr("class", "x_axis danceGraph")
+                       .attr("id", "danceGraph")
 
         var valenceAxisGen = d3.axisBottom().scale(valenceScale)
-        xAxis = svg.append("g")
+        var xAxis3 = svg.append("g")
                     .call(valenceAxisGen)
                     .style("transform", `translateY(${dimensions.height-dimensions.margin.bottom}px)`)
+                    .attr("class", "x_axis valenceGraph")
+                    .attr("id", "valenceGraph")
                
         var speechAxisGen = d3.axisBottom().scale(speechScale)
-        xAxis = svg.append("g")
+        var xAxis4 = svg.append("g")
                     .call(speechAxisGen)
                     .style("transform", `translateY(${dimensions.height-dimensions.margin.bottom}px)`)
+                    .attr("class", "x_axis speechGraph")
+                    .attr("id", "speechGraph")
                            
         var liveAxisGen = d3.axisBottom().scale(liveScale)
-        xAxis = svg.append("g")
+        var xAxis5 = svg.append("g")
                     .call(liveAxisGen)
                     .style("transform", `translateY(${dimensions.height-dimensions.margin.bottom}px)`)
+                    .attr("class", "x_axis liveGraph")
+                    .attr("id", "liveGraph")
                     
         var yAxisGen = d3.axisLeft().scale(yScale)
         var yAxis = svg.append("g")
@@ -165,7 +177,7 @@ d3.csv("condensedGenresFixed.csv").then(
                        .style("transform", `translateX(${dimensions.margin.left}px)`)
 
         svg.append("text")
-            .attr("class", "x label")
+            .attr("class", "xLabel acousticGraph")
             .attr("x", calcLabelX(1, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
@@ -173,7 +185,7 @@ d3.csv("condensedGenresFixed.csv").then(
             .text("Acousticness");
         
         svg.append("text")
-            .attr("class", "x label")
+            .attr("class", "xLabel danceGraph")
             .attr("x", calcLabelX(2, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
@@ -181,7 +193,7 @@ d3.csv("condensedGenresFixed.csv").then(
             .text("Danceability");
 
         svg.append("text")
-            .attr("class", "x label")
+            .attr("class", "xLabel valenceGraph")
             .attr("x", calcLabelX(3, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
@@ -189,7 +201,7 @@ d3.csv("condensedGenresFixed.csv").then(
             .text("Valence");
 
         svg.append("text")
-            .attr("class", "x label")
+            .attr("class", "xLabel speechGraph")
             .attr("x", calcLabelX(4, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
@@ -197,7 +209,7 @@ d3.csv("condensedGenresFixed.csv").then(
             .text("Speechiness");
 
         svg.append("text")
-            .attr("class", "x label")
+            .attr("class", "xLabel liveGraph")
             .attr("x", calcLabelX(5, 2))
             .attr("y", dimensions.height-5)
             .style("fill", "black")
@@ -207,7 +219,7 @@ d3.csv("condensedGenresFixed.csv").then(
         
         d3.selectAll('circle').on('mouseover', (d,i) => {
             d3.select(d.srcElement).style('stroke', 'black')
-            d3.select(d.srcElement).style('stroke-width', 1.25)
+                                   .style('stroke-width', 1.25)
         })
     
         d3.selectAll('circle').on('mouseout', (d,i) => {
@@ -221,68 +233,101 @@ d3.csv("condensedGenresFixed.csv").then(
             if (currentOpacity < 1.0) {
                 // Set all circle opacities to 0.1
                 d3.selectAll('circle').style("fill-opacity", "0.1");
-                // Set the clicked circle's opacity to 1.0
+
+                // Increase clicked circle opacity
                 clickedCircle.style('fill-opacity', "1.0");
+                clickedCircle.style('stroke', 'black');
+                clickedCircle.style('stroke-width', 2);
             } else {
                 // Reset all circle opacities to their original value (e.g., 1.0)
                 d3.selectAll('circle').style("fill-opacity", opacity);
+                clickedCircle.style('stroke-width', 0);
             }
+        });
+
+        function hideElements(clickedLabel) {
+            d3.selectAll('.xLabel').style("visibility", "hidden");
+            d3.selectAll('circle').style("visibility", "hidden");
+
+            if(clickedLabel.classed('acousticGraph')) {
+                d3.selectAll('.acousticGraph').style("visibility", "visible");
+                xAxis2.style("visibility", "hidden");
+                xAxis3.style("visibility", "hidden");
+                xAxis4.style("visibility", "hidden");
+                xAxis5.style("visibility", "hidden");
+            }
+            else if (clickedLabel.classed('danceGraph')) {
+                d3.selectAll('.danceGraph').style("visibility", "visible");
+                xAxis.style("visibility", "hidden");
+                xAxis3.style("visibility", "hidden");
+                xAxis4.style("visibility", "hidden");
+                xAxis5.style("visibility", "hidden");
+            }
+            else if (clickedLabel.classed('valenceGraph')) {
+                d3.selectAll('.valenceGraph').style("visibility", "visible");
+                xAxis.style("visibility", "hidden");
+                xAxis2.style("visibility", "hidden");
+                xAxis4.style("visibility", "hidden");
+                xAxis5.style("visibility", "hidden");
+            }
+            else if (clickedLabel.classed('speechGraph')) {
+                d3.selectAll('.speechGraph').style("visibility", "visible");
+                xAxis.style("visibility", "hidden");
+                xAxis2.style("visibility", "hidden");
+                xAxis3.style("visibility", "hidden");
+                xAxis5.style("visibility", "hidden");
+            }
+            else if (clickedLabel.classed('liveGraph')) {
+                d3.selectAll('.liveGraph').style("visibility", "visible");
+                xAxis.style("visibility", "hidden");
+                xAxis2.style("visibility", "hidden");
+                xAxis3.style("visibility", "hidden");
+                xAxis4.style("visibility", "hidden");
+            }
+        }
+
+        function unhideElements() {
+            d3.selectAll('.xLabel').style("visibility", "visible");
+            d3.selectAll('circle').style("visibility", "visible");
+            xAxis.style("visibility", "visible")
+            xAxis2.style("visibility", "visible");
+            xAxis3.style("visibility", "visible");
+            xAxis4.style("visibility", "visible");
+            xAxis5.style("visibility", "visible");
+        }
+
+        let clickedState = false;
+
+        var fullScale = d3.scaleLinear()
+                          .domain([0,1])
+                          .range([dimensions.margin.left, dimensions.width-dimensions.margin.right])
+        var fullXAxisGen = d3.axisBottom().scale(fullScale)
+
+        d3.selectAll('.xLabel').on('click', (d,i) => {
+            const clickedLabel = d3.select(d.srcElement);
+
+            // Hide all elements besides selected graph
+            if(!clickedState) {
+                clickedState=true;
+                hideElements(clickedLabel);
+                //expand x-axis
+
+                // acousticScale.range([dimensions.margin.left, dimensions.width-dimensions.margin.right])
+
+                // d3.select(".acousticGraph").call(xAxisGen)
+                //                            .transition()
+                //                            .duration(1500);
+                    //  .style("transform", `translateY(${dimensions.height-dimensions.margin.bottom}px)`)
+                    //  .attr("class", "x_axis acousticGraph");
+
+            }
+            // Set everything to be visible
+            else {
+                clickedState=false;
+                unhideElements();
+            }
+            
         });
 
     }
 )
-
-
-
-
-
-
-// svg.append("text")
-        //     .attr("class", "y label")
-        //     // .attr("text-anchor", "end")
-        //     .attr("x", 105)
-        //     .attr("y", dimensions.height/2)
-        //     .attr("dy", ".75em")
-        //     .attr("transform", "rotate(-90)")
-        //     .style("fill", "black")
-        //     .text("Energy");
-
-    // selection.call(d3.zoom().on("zoom", zoomed));
-
-    // let zoom = d3.zoom()
-	// .on('zoom', handleZoom);
-
-    // function handleZoom(e) {
-    //     d3.select('svg g')
-    //         .attr('transform', e.transform);
-    // }
-
-    // function initZoom() {
-    //     d3.select('svg')
-    //         .call(zoom);
-    // }
-
-    // function updateData() {
-    //     data = [];
-    //     for(let i=0; i<numPoints; i++) {
-    //         data.push({
-    //             id: i,
-    //             x: Math.random() * dimensions.width,
-    //             y: Math.random() * dimensions.height
-    //         });
-    //     }
-    // }
-    
-    // function update() {
-    //     d3.select('svg g')
-    //         .selectAll('circle')
-    //         .data(dataset)
-    //         .join('circle')
-    //         .attr('cx', function(d) { return d.x; })
-    //         .attr('cy', function(d) { return d.y; })
-    //         .attr('r', 3);
-    // }
-
-    // initZoom();
-    // updateData();
-    // update();
