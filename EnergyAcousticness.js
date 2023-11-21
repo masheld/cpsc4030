@@ -87,6 +87,7 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("fill", "steelblue")
                       .attr("fill-opacity", opacity)
                       .attr("class", "acousticGraph")
+                      .attr("id", "acousticDots")
 
         var danceDots = svg.append("g")
                       .selectAll("circle")
@@ -99,6 +100,7 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("fill", "orange")
                       .attr("fill-opacity", opacity)
                       .attr("class", "danceGraph")
+                      .attr("id", "danceDots")
 
         var valenceDots = svg.append("g")
                       .selectAll("circle")
@@ -111,6 +113,7 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("fill", "green")
                       .attr("fill-opacity", opacity)
                       .attr("class", "valenceGraph")
+                      .attr("id", "valenceDots")
 
         var speechDots = svg.append("g")
                       .selectAll("circle")
@@ -123,6 +126,7 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("fill", "red")
                       .attr("fill-opacity", opacity)
                       .attr("class", "speechGraph")
+                      .attr("id", "speechDots")
 
         var liveDots = svg.append("g")
                       .selectAll("circle")
@@ -135,6 +139,7 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("fill", "purple")
                       .attr("fill-opacity", opacity)
                       .attr("class", "liveGraph")
+                      .attr("id", "liveDots")
 
         var xAxisGen = d3.axisBottom().scale(acousticScale)
         var xAxis = svg.append("g")
@@ -142,6 +147,8 @@ d3.csv("condensedGenresFixed.csv").then(
                        .style("transform", `translateY(${dimensions.height-dimensions.margin.bottom}px)`)
                        .attr("class", "x_axis acousticGraph")
                        .attr("id", "acousticGraph")
+
+        console.log(xAxis)
 
         var danceAxisGen = d3.axisBottom().scale(danceScale)
         var xAxis2 = svg.append("g")
@@ -182,7 +189,8 @@ d3.csv("condensedGenresFixed.csv").then(
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .attr("text-anchor", "middle")
-            .text("Acousticness");
+            .text("Acousticness")
+            .attr("id", "acousticLabel")
         
         svg.append("text")
             .attr("class", "xLabel danceGraph")
@@ -190,7 +198,8 @@ d3.csv("condensedGenresFixed.csv").then(
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .attr("text-anchor", "middle")
-            .text("Danceability");
+            .text("Danceability")
+            .attr("id", "danceLabel")
 
         svg.append("text")
             .attr("class", "xLabel valenceGraph")
@@ -198,7 +207,8 @@ d3.csv("condensedGenresFixed.csv").then(
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .attr("text-anchor", "middle")
-            .text("Valence");
+            .text("Valence")
+            .attr("id", "valenceLabel")
 
         svg.append("text")
             .attr("class", "xLabel speechGraph")
@@ -206,7 +216,8 @@ d3.csv("condensedGenresFixed.csv").then(
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .attr("text-anchor", "middle")
-            .text("Speechiness");
+            .text("Speechiness")
+            .attr("id", "speechLabel")
 
         svg.append("text")
             .attr("class", "xLabel liveGraph")
@@ -214,7 +225,8 @@ d3.csv("condensedGenresFixed.csv").then(
             .attr("y", dimensions.height-5)
             .style("fill", "black")
             .attr("text-anchor", "middle")
-            .text("Liveness");
+            .text("Liveness")
+            .attr("id", "liveLabel")
 
         
         d3.selectAll('circle').on('mouseover', (d,i) => {
@@ -296,37 +308,93 @@ d3.csv("condensedGenresFixed.csv").then(
             xAxis5.style("visibility", "visible");
         }
 
-        let clickedState = false;
+        function expandAxis(clickedLabel) {
+            if(clickedLabel.classed("acousticGraph")) {
+                acousticScale.range([dimensions.margin.left, dimensions.width-dimensions.margin.right])
+                d3.select("#acousticGraph").call(xAxisGen)
+                                            .transition()
+                                            .duration(1500);
+                d3.selectAll("#acousticDots").attr("cx", d => acousticScale(acousticAccessor(d))) 
+                d3.select("#acousticLabel").attr("x", dimensions.width/2)
+            }
+            else if(clickedLabel.classed("danceGraph")) {
+                danceScale.range([dimensions.margin.left, dimensions.width-dimensions.margin.right])
+                d3.select("#danceGraph").call(danceAxisGen)
+                d3.selectAll("#danceDots").attr("cx", d => danceScale(danceAccessor(d))) 
+                d3.select("#danceLabel").attr("x", dimensions.width/2)
+            }
+            else if(clickedLabel.classed("valenceGraph")) {
+                valenceScale.range([dimensions.margin.left, dimensions.width-dimensions.margin.right])
+                d3.select("#valenceGraph").call(valenceAxisGen)
+                d3.selectAll("#valenceDots").attr("cx", d => valenceScale(valenceAccessor(d))) 
+                d3.select("#valenceLabel").attr("x", dimensions.width/2)
+            }
+            else if(clickedLabel.classed("speechGraph")) {
+                speechScale.range([dimensions.margin.left, dimensions.width-dimensions.margin.right])
+                d3.select("#speechGraph").call(speechAxisGen)
+                d3.selectAll("#speechDots").attr("cx", d => speechScale(speechAccessor(d))) 
+                d3.select("#speechLabel").attr("x", dimensions.width/2)
+            }
+            else if(clickedLabel.classed("liveGraph")) {
+                liveScale.range([dimensions.margin.left, dimensions.width-dimensions.margin.right])
+                d3.select("#liveGraph").call(liveAxisGen)
+                d3.selectAll("#liveDots").attr("cx", d => liveScale(liveAccessor(d))) 
+                d3.select("#liveLabel").attr("x", dimensions.width/2)
+            }
+        }
 
-        var fullScale = d3.scaleLinear()
-                          .domain([0,1])
-                          .range([dimensions.margin.left, dimensions.width-dimensions.margin.right])
-        var fullXAxisGen = d3.axisBottom().scale(fullScale)
+        function collapseAxis(clickedLabel) {
+            if(clickedLabel.classed("acousticGraph")) {
+                acousticScale.range([dimensions.margin.left, calcAxisWidth(1, 2)])
+                d3.select("#acousticGraph").call(xAxisGen)
+                                            .transition()
+                                            .duration(1500);
+                d3.selectAll("#acousticDots").attr("cx", d => acousticScale(acousticAccessor(d))) 
+                d3.select("#acousticLabel").attr("x", calcLabelX(1, 2))
+            }
+            else if(clickedLabel.classed("danceGraph")) {
+                danceScale.range([calcAxisWidth(1, 1), calcAxisWidth(2, 2)])
+                d3.select("#danceGraph").call(danceAxisGen)
+                d3.selectAll("#danceDots").attr("cx", d => danceScale(danceAccessor(d))) 
+                d3.select("#danceLabel").attr("x", calcLabelX(2, 2))
+            }
+            else if(clickedLabel.classed("valenceGraph")) {
+                valenceScale.range([calcAxisWidth(2, 1), calcAxisWidth(3, 2)])
+                d3.select("#valenceGraph").call(valenceAxisGen)
+                d3.selectAll("#valenceDots").attr("cx", d => valenceScale(valenceAccessor(d))) 
+                d3.select("#valenceLabel").attr("x", calcLabelX(3, 2))
+            }
+            else if(clickedLabel.classed("speechGraph")) {
+                speechScale.range([calcAxisWidth(3, 1), calcAxisWidth(4, 2)])
+                d3.select("#speechGraph").call(speechAxisGen)
+                d3.selectAll("#speechDots").attr("cx", d => speechScale(speechAccessor(d))) 
+                d3.select("#speechLabel").attr("x", calcLabelX(4, 2))
+            }
+            else if(clickedLabel.classed("liveGraph")) {
+                liveScale.range([calcAxisWidth(4, 1), calcAxisWidth(5, 2)])
+                d3.select("#liveGraph").call(liveAxisGen)
+                d3.selectAll("#liveDots").attr("cx", d => liveScale(liveAccessor(d))) 
+                d3.select("#liveLabel").attr("x", calcLabelX(5, 2))
+            }
+        }
+
+        let clickedState = false;
 
         d3.selectAll('.xLabel').on('click', (d,i) => {
             const clickedLabel = d3.select(d.srcElement);
 
-            // Hide all elements besides selected graph
+            // Hide other graphs and expand selected graph
             if(!clickedState) {
                 clickedState=true;
                 hideElements(clickedLabel);
-                //expand x-axis
-
-                // acousticScale.range([dimensions.margin.left, dimensions.width-dimensions.margin.right])
-
-                // d3.select(".acousticGraph").call(xAxisGen)
-                //                            .transition()
-                //                            .duration(1500);
-                    //  .style("transform", `translateY(${dimensions.height-dimensions.margin.bottom}px)`)
-                    //  .attr("class", "x_axis acousticGraph");
-
+                expandAxis(clickedLabel);
             }
-            // Set everything to be visible
+            // Return to original state
             else {
                 clickedState=false;
                 unhideElements();
+                collapseAxis(clickedLabel);
             }
-            
         });
 
     }
