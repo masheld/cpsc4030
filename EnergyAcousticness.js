@@ -68,10 +68,6 @@ d3.csv("condensedGenresFixed.csv").then(
                        .domain(d3.extent(dataset, yAccessor))
                        .range([dimensions.height-dimensions.margin.bottom, dimensions.margin.top]) 
 
-        // for(graphNum) {
-        //     append ...
-        //     if(graphNum=1)
-        // }
 
         let opacity = 0.15
         let radius = 3
@@ -235,25 +231,58 @@ d3.csv("condensedGenresFixed.csv").then(
         })
     
         d3.selectAll('circle').on('mouseout', (d,i) => {
-            d3.select(d.srcElement).style('stroke-width', 0)
+            const mouseoutCircle = d3.select(d.srcElement);
+            const currentOpacity = parseFloat(mouseoutCircle.style('fill-opacity'));
+
+            if (d.currentTarget != previousTarget){
+                d3.select(d.srcElement).style('stroke-width', 0)
+            }
         })
 
+        let clickedCircle = null;
+        let previousTarget = null;
+        let currentTarget = null;
         d3.selectAll('circle').on('click', (d, i) => {
-            const clickedCircle = d3.select(d.srcElement);
-            const currentOpacity = parseFloat(clickedCircle.style('fill-opacity'));
-            
-            if (currentOpacity < 1.0) {
-                // Set all circle opacities to 0.1
+            currentTarget = d.currentTarget;
+            console.log(currentTarget)
+            console.log(clickedCircle)
+
+            // First clicked circle
+            if (!clickedCircle) {
+                clickedCircle = d3.select(d.srcElement)
+                previousTarget = d.currentTarget;
+
+                // Decrease all circles' opacities
+                d3.selectAll('circle').style("fill-opacity", "0.1");
+
+                // Increase clicked circle opacity
+                clickedCircle.style('fill-opacity', "1.0");
+                clickedCircle.style('stroke', 'black');
+                clickedCircle.style('stroke-width', 1.25);
+            }
+            // Clicked the same circle
+            else if (previousTarget == currentTarget) {
+                d3.selectAll('circle').style("fill-opacity", opacity);
+                clickedCircle.style('stroke-width', 0);
+                previousTarget = null;
+            }
+            // Clicked different circle
+            else {
+                previousTarget = currentTarget;
+                currentTarget = d.currentTarget;
+
+                // Remove stroke from previous selection before making new selection
+                clickedCircle.style('stroke-width', 0);
+                clickedCircle.style('fill-opacity', opacity);
+                clickedCircle = d3.select(d.srcElement);
+
+                // Decrease all circles' opacities
                 d3.selectAll('circle').style("fill-opacity", "0.1");
 
                 // Increase clicked circle opacity
                 clickedCircle.style('fill-opacity', "1.0");
                 clickedCircle.style('stroke', 'black');
                 clickedCircle.style('stroke-width', 2);
-            } else {
-                // Reset all circle opacities to their original value (e.g., 1.0)
-                d3.selectAll('circle').style("fill-opacity", opacity);
-                clickedCircle.style('stroke-width', 0);
             }
         });
 
@@ -314,7 +343,7 @@ d3.csv("condensedGenresFixed.csv").then(
                 d3.select("#acousticGraph").call(xAxisGen)
                                             .transition()
                                             .duration(1500);
-                d3.selectAll("#acousticDots").attr("cx", d => acousticScale(acousticAccessor(d))) 
+                d3.selectAll("#acousticDots").attr("cx", d => acousticScale(acousticAccessor(d)))
                 d3.select("#acousticLabel").attr("x", dimensions.width/2)
             }
             else if(clickedLabel.classed("danceGraph")) {
