@@ -4,6 +4,13 @@
 <head>
     <meta charset="utf-8" />
     <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        .highlighted {
+            font-weight: bold;
+            fill: rgb(255, 0, 0);
+        }
+    </style>
+
 </head>
 
 <body>
@@ -15,10 +22,10 @@
             bottom: 50,
             left: 50
         };
+
         const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
 
-      
         const svg = d3
             .select('body')
             .append('svg')
@@ -29,31 +36,77 @@
 
         // loading data
         d3.csv('v3.csv').then((data) => {
-            // Extract unique genres and years from the data
+            data.forEach(d => {
+                d.Year = String(d.Year);
+            });
             const genres = Array.from(new Set(data.map((d) => d.Genre)));
             const years = Array.from(new Set(data.map((d) => d.Year)));
 
             // sort years
             years.sort((a, b) => b - a);
 
-        
             const xScale = d3.scaleBand().domain(genres).range([0, width]);
-            const yScale = d3.scaleBand().domain(years.map(String)).range([0, height]);
+            const yScale = d3.scaleBand().domain(years).range([0, height]);
 
             // colors
-            const colorScale = d3.scaleSequential(d3.interpolateBlues).domain([0, d3.max(data, (d) => +d.Stream)]);
+            const colorScale = d3.scaleSequential(d3.interpolateReds).domain([0, d3.max(data, (d) => +d.Stream)]);
 
-           
-            svg
-                .selectAll('rect')
+            const rectGroup = svg.selectAll('rect')
                 .data(data)
                 .enter()
+                .append('g');
+
+            // Initial rendering of the heatmap
+            rectGroup
                 .append('rect')
                 .attr('x', (d) => xScale(d.Genre))
-                .attr('y', (d) => yScale(String(d.Year)))
+                .attr('y', (d) => yScale(d.Year))
                 .attr('width', xScale.bandwidth())
                 .attr('height', yScale.bandwidth())
-                .style('fill', (d) => colorScale(+d.Stream));
+                .style('fill', (d) => colorScale(+d.Stream))
+                .attr('genre', (d) => d.Genre) // change data-genre to just genre
+                .attr('year', (d) => d.Year);
+
+            // Add hover effect
+            let isGenreClicked = false;
+
+            rectGroup
+                .on('mouseover', function(event, d) {
+                    const currentGenre = d3.select(this).select('rect').attr('genre');
+                    const currentYear = d3.select(this).select('rect').attr('year');
+                    console.log("Genre Selected: " + currentGenre)
+                    console.log("Year Selected: " + currentYear)
+                        // Apply opacity change only if the click event is not active
+                    if (!isGenreClicked) {
+                        svg.selectAll('rect')
+                            .style('opacity', 0.0);
+                        svg.selectAll(`rect[genre="${currentGenre}"]`)
+                            .style('opacity', 1);
+                    }
+                })
+                .on('mouseout', function(event, d) {
+                    // Restore full opacity only if the click event is not active
+                    if (!isGenreClicked) {
+                        svg.selectAll('rect')
+                            .style('opacity', 1);
+                    }
+                })
+                .on('click', function(event, d) {
+                    const currentGenre = d3.select(this).select('rect').attr('genre');
+                    isGenreClicked = !isGenreClicked;
+
+                    // If the click state is active, show only the selected genre
+                    if (isGenreClicked) {
+                        svg.selectAll('rect')
+                            .style('opacity', 0.0);
+                        svg.selectAll(`rect[genre="${currentGenre}"]`)
+                            .style('opacity', 1);
+                    } else {
+                        // If the click state is inactive, restore full opacity
+                        svg.selectAll('rect')
+                            .style('opacity', 1);
+                    }
+                });
 
             // x axis label
             svg.append('text')
@@ -75,8 +128,53 @@
                 .call(d3.axisBottom(xScale));
 
             // Create the y-axis with ticks for every 5 years
-            const tickValues = years.filter((year) => year % 5 === 0).map(String);
+            const tickValues = years.filter((year) => year % 5 === 0);
             svg.append('g').call(d3.axisLeft(yScale).tickValues(tickValues));
+
+            const yAxis = svg.append('g').call(d3.axisLeft(yScale).tickValues(tickValues));
+
+            yAxis.selectAll('.tick text').on('click', function(event, d) {
+                const selectedYear = this.textContent;
+
+                console.log(selectedYear);
+
+                const isSameYear = selectedYear === activeYear;
+
+                // Toggle between filtered data and default state
+                if (isSameYear) {
+                    activeYear = null;
+                    rectGroup
+                        .selectAll('rect')
+                        .transition()
+                        .duration(500)
+                        .style('fill', (d) => colorScale(+d.Stream));
+
+                    d3.select(this)
+                        .classed('highlighted', false);
+                } else {
+                    // Set the active year and show the filtered data
+                    activeYear = selectedYear;
+                    const filteredData = data.filter((item) => item.Year == selectedYear);
+                    rectGroup
+                        .selectAll('rect')
+                        .transition()
+                        .duration(500)
+                        .style('fill', (d) => {
+                            const matchingData = filteredData.find((filteredItem) => filteredItem.Genre === d.Genre && filteredItem.Year === d.Year);
+                            return matchingData ? colorScale(+matchingData.Stream) : 'white';
+                        });
+
+                    yAxis.selectAll('.tick text').classed('highlighted', false);
+
+                    d3.select(this)
+                        .classed('highlighted', true);
+                }
+
+                isGenreClicked = false;
+            });
+            let activeYear = null;
+
+
         });
     </script>
 </body>
