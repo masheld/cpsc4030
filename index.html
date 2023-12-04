@@ -2,25 +2,30 @@
 <html>
 
 <head>
-    <meta charset="UTF-8"/>
     <title>
-        Milestone 3
+        Project
     </title>
-    <script src="https:/d3js.org/d3.v7.min.js"></script>
-
-    <body>
-        <h1>Which of Spotify’s proprietary metrics influence energy the most?</h1>
-        <div id="scatterplot_placeholder">
-            <svg id="scatterplot">
-
-            </svg>
-        </div>
-        <script src="EnergyAcousticness.js"></script>
-        
-        <!-- <img src="question1.svg" alt="SVG Image">
-        <img src="question2.svg" alt="SVG Image">
-        <img src="question3.svg" alt="SVG Image"> -->
-    </body>
+    <style>
+        .highlighted {
+            font-weight: bold;
+            fill: rgb(255, 0, 0);
+        }
+    </style>
 </head>
+
+
+<body>
+    <div id="heatmap" width="800" height="400"></div>
+    <br>
+    <br>
+    <svg id="scatterplot" width="800" height="400"></svg>
+    <br>
+    <br>
+    <div id="stackedBarChart" width="800" height="400"></div>
+    <div id="colorKey"></div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="viz1.js"></script>
+    <script src="viz2.js"></script>
+    <script src="viz3.js"></script>
 
 </html>
