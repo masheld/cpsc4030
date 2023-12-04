@@ -1,17 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <title>Viz 2</title>
-</head>
-<body>
-<div id="chart">
-    <svg id ="stackedBar">
+<html>
 
-    </svg>
-</div>
-<script src="viz2.js"></script>
-</body>
+<head>
+    <title>
+        Project
+    </title>
+    <style>
+        .highlighted {
+            font-weight: bold;
+            fill: rgb(255, 0, 0);
+        }
+    </style>
+</head>
+
+
+<body>
+    <div id="heatmap" width="800" height="400"></div>
+    <br>
+    <br>
+    <svg id="scatterplot" width="800" height="400"></svg>
+    <br>
+    <br>
+    <div id="stackedBarChart" width="800" height="400"></div>
+    <div id="colorKey"></div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="viz1.js"></script>
+    <script src="viz2.js"></script>
+    <script src="viz3.js"></script>
+
 </html>
