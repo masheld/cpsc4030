@@ -7,12 +7,12 @@ const width = svgWidth - margin.left - margin.right;
 const height = svgHeight - margin.top - margin.bottom;
 
 
-const svg = d3.create("svg")
+const svg = d3.select("#stackedBar")
+    .append("svg")
     .attr("width", svgWidth)
     .attr("height", svgHeight)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
-
 
 d3.csv("/condensedGenresFixed.csv").then(function(data){
 
@@ -64,6 +64,12 @@ d3.csv("/condensedGenresFixed.csv").then(function(data){
     const colorScale = d3.scaleOrdinal()
         .domain(['Acoustic', 'Dance', 'Valence', 'Speech', 'Live', 'Energy'])
         .range(d3.schemeCategory10);
+
+
+
+
+
+
 
 })
 
