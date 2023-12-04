@@ -7,14 +7,17 @@ const width = svgWidth - margin.left - margin.right;
 const height = svgHeight - margin.top - margin.bottom;
 
 
-const svg = d3.select("#stackedBar")
-    .append("svg")
-    .attr("width", svgWidth)
-    .attr("height", svgHeight)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-d3.csv("/condensedGenresFixed.csv").then(function(data){
+
+d3.csv("condensedGenresFixed.csv").then(function(data){
+
+    const svg = d3.select("#stackedBar")
+        .append("svg")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
 
     let acoustic = data.map(d => +d['AcousticnessPercent']);
     let dance = data.map(d => +d['DanceabilityPercent']);
