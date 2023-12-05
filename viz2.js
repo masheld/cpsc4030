@@ -76,18 +76,14 @@ d3.csv("viz2.csv").then(function(dataset) {
             .attr("height", d => yScale(d[0]) - yScale(d[1]))
             .attr("width", xScale.bandwidth())
             .on('mouseover', function (event, d) {
-                // Select the entire portion of the bar
-                d3.select(d.Year)
+                d3.select(this)
                     .style('stroke', 'black')
                     .style('stroke-width', 2);
-
-
             })
             .on('mouseout', function (event, d) {
-                // Revert styles on mouseout
                 d3.selectAll('rect')
                     .style('stroke-width', 0);
-            })
+            });
 
         const xAxis = svg.append("g")
             .attr("class", "x-axis")
@@ -183,7 +179,13 @@ d3.csv("viz2.csv").then(function(dataset) {
             .domain(keys)
             .range([0, x0.bandwidth()])
 
-        var maxSum = d3.max(filteredData, d => d3.sum(keys, key => +d[key]));
+
+
+        var cumulativeSums = {};
+        keys.forEach(function (key) {
+            cumulativeSums[key] = d3.cumsum(filteredData.map(d => +d[key]));
+        });
+        var maxSum = d3.max(keys.map(key => d3.max(cumulativeSums[key])));
 
         var yScale = d3.scaleLinear()
             .domain([0, maxSum])
@@ -202,8 +204,8 @@ d3.csv("viz2.csv").then(function(dataset) {
 
         var text = svg.append('text')
             .attr("id", 'topbartext')
-            .attr("x", dimensions.margin.left)
-            .attr("y", 10)
+            .attr("x", dimensions.width / 2)
+            .attr("y", 15)
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
             .attr("font-family", "sans-serif")
@@ -216,20 +218,20 @@ d3.csv("viz2.csv").then(function(dataset) {
         keys.forEach(function (key) {
             newBars.append("rect")
                 .attr("x", d => x1(key))
-                .attr("y", d => yScale(d[key]))
+                .attr("y", d => yScale(d3.sum(filteredData, d => +d[key])))
                 .attr("width", x1.bandwidth())
-                .attr("height", d => dimensions.height - dimensions.margin.bottom - yScale(+d[key]))
+                .attr("height", d => dimensions.height - dimensions.margin.bottom - yScale(d3.sum(filteredData, d => +d[key])))
                 .attr("fill", colorScale(key))
-                .on('mouseover', function (event, d) {
+                .on('mouseover', function (event) {
                     d3.select(this)
                         .style('stroke', 'black')
                         .style('stroke-width', 2);
-                        text.text("Value of Highlighted Variable: " + d[key]);
+                    text.text("Sum of Values for " + key + ": " + d3.sum(filteredData, d => +d[key]));
                 })
-                .on('mouseout', function (event, d) {
-                    d3.selectAll('rect')
-                        .style('stroke-width', 0)
-                    text.text("Value of Highlighted Variable: 0");
+                .on('mouseout', function () {
+                    d3.select(this)
+                        .style('stroke-width', 0);
+                    text.text("Sum of Values: 0");
                 });
         });
 
@@ -246,7 +248,7 @@ d3.csv("viz2.csv").then(function(dataset) {
             .selectAll(".tick text")
             .attr("class", "x-label")
             .attr("fill", "black")
-            .attr("text-anchor", "end")
+            .attr("text-anchor", "middle ")
             .on("click", function (event, d) {
                 resetChart()
                 originalChart();
