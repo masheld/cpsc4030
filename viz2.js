@@ -1,121 +1,66 @@
-d3.csv("viz2.csv").then(function(dataset) {
+d3.csv("condensedGenresFixed.csv").then(function (data) {
+    const svgWidth = 700;
+    const svgHeight = 500;
 
-    var dimensions = {
-        width: 1000,
-        height: 600,
-        margin: {
-            top: 10,
-            bottom: 50,
-            right: 10,
-            left: 50
-        }
-    };
+    const margin = { top: 25, right: 25, bottom: 50, left: 50 };
 
-    dataset.forEach(function(d) {
-        d.Year = +d.Year;
-    });
-    dataset.sort((a, b) => a.Year - b.Year);
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
 
-    var xScale = d3.scaleBand()
-        .domain(dataset.map(d => d.Year.toString()))
-        .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
-        .padding([0.2]);
+    const svg = d3.select("#stackedBar")
+        .style("width", svgWidth)
+        .style("height", svgHeight)
 
-    var firstYear = dataset[0].Year;
-    var lastYear = dataset[dataset.length - 1].Year;
-    var xTicks = [];
-    for (var year = firstYear; year <= lastYear; year += 5) {
-        xTicks.push(year.toString());
-    }
+    var acoustic = data.map(d => +d['AcousticnessPercent']);
+    var dance = data.map(d => +d['DanceabilityPercent']);
+    var valence = data.map(d => +d['ValencePercent']);
+    var speech = data.map(d => +d['SpeechinessPercent']);
+    var live = data.map(d => +d['LivenessPercent']);
+    var energy = data.map(d => +d['EnergyPercent']);
 
-    var keys = dataset.columns.slice(2);
+    const x = d3.scaleBand()
+        .domain(data.map(function(d){return d.Year;}))
+        .range([0, width])
+        .padding(0.1);
 
-    var maxSum = d3.max(dataset, d => d3.sum(keys, key => +d[key]));
+    const y = d3.scaleLinear()
+        .domain([0, d3.max([acoustic, dance, valence, speech, live, energy].map(d3.max))]) // Adjust to consider all categories
+        .range([height, 0]);
 
-    var yScale = d3.scaleLinear()
-        .domain([0, maxSum])
-        .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]);
+    var bounds = svg.append("g")
+        .style("transform", `translate(${margin.left}px, ${margin.top}px)`)
 
-    var colorScale = d3.scaleOrdinal()
-        .domain(keys)
-        .range(["#b3e2cd", "#fdcdac", "#cbd5e8", "#f4cae4", "#e6f5c9", "#fff2ae", "#f1e2cc", "#cccccc"]);
-
-    var stackedData = d3.stack()
-        .keys(keys)
-        (dataset);
-
-    var svg = d3.select("#stackedBarChart")
-        .append("svg")
-        .attr("width", dimensions.width)
-        .attr("height", dimensions.height);
-
-    svg.append("g")
-        .selectAll("g")
-        .data(stackedData)
+    const bars = bounds
+        .selectAll("bar")
+        .data(d => [
+            { category: 'Acoustic', value: +d['AcousticnessPercent'] },
+            { category: 'Dance', value: +d['DanceabilityPercent'] },
+            { category: 'Valence', value: +d['ValencePercent'] },
+            { category: 'Speech', value: +d['SpeechinessPercent'] },
+            { category: 'Live', value: +d['LivenessPercent'] },
+            { category: 'Energy', value: +d['EnergyPercent'] }
+        ])
         .enter()
-        .append("g")
-        .attr("fill", d => colorScale(d.key))
-        .selectAll("rect")
-        .data(d => d)
-        .enter()
-        .append("rect")
-        .attr("x", d => xScale(d.data.Year.toString()))
-        .attr("y", d => yScale(d[1]))
-        .attr("height", d => yScale(d[0]) - yScale(d[1]))
-        .attr("width", xScale.bandwidth());
+        .append('rect')
+        .attr('x', function(d) { return x(d.year); })
+        .attr('width', x.bandwidth)
+        .attr('y', function(d) { return  d => y(d.value); })
+        .attr('height', d => height - y(d.value))
+        .attr("fill", "steelblue")
 
     svg.append("g")
-        .attr("transform", `translate(0, ${dimensions.height - dimensions.margin.bottom})`)
-        .call(d3.axisBottom(xScale).tickValues(xTicks))
-        .append("text")
-        .attr("x", dimensions.width / 2)
-        .attr("y", 40)
-        .attr("fill", "black")
-        .attr("text-anchor", "middle")
-        .text("Year");
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x));
 
     svg.append("g")
-        .attr("transform", `translate(${dimensions.margin.left}, 0)`)
-        .call(d3.axisLeft(yScale))
-        .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", -40)
-        .attr("x", -(dimensions.height / 2))
-        .attr("fill", "black")
-        .attr("text-anchor", "middle")
-        .text("Value");
+        .call(d3.axisLeft(y));
 
-    // Color Key
-    var colorKey = d3.select("#colorKey")
-        .append("svg")
-        .attr("width", dimensions.width)
-        .attr("height", 50)
-        .append("g")
-        .attr("transform", "translate(10, 0)");
 
-    var legend = colorKey.selectAll(".legend")
-        .data(keys)
-        .enter().append("g")
-        .attr("class", "legend")
-        .attr("transform", function(d, i) {
-            return "translate(" + i * 120 + ",0)";
-        });
 
-    legend.append("rect")
-        .attr("x", 0)
-        .attr("width", 18)
-        .attr("height", 18)
-        .style("fill", function(d) {
-            return colorScale(d);
-        });
 
-    legend.append("text")
-        .attr("x", 25)
-        .attr("y", 9)
-        .attr("dy", ".35em")
-        .style("text-anchor", "start")
-        .text(function(d) {
-            return d;
-        });
 
 });
+
+
+
+
