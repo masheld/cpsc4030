@@ -3,12 +3,11 @@ const margin = {
     top: 50,
     right: 50,
     bottom: 50,
-    left: 50
+    left: 90
 };
 
 const width = 1400 - margin.left - margin.right;
 const height = 400 - margin.top - margin.bottom;
-
 
 const svg = d3
     .select('#heatmap')
@@ -23,14 +22,15 @@ d3.csv('v3.csv').then((data) => {
     data.forEach(d => {
         d.Year = String(d.Year);
     });
+
     const genres = Array.from(new Set(data.map((d) => d.Genre)));
     const years = Array.from(new Set(data.map((d) => d.Year)));
 
     // sort years
-    years.sort((a, b) => b - a);
+    years.sort((a, b) => a - b);
 
-    const xScale = d3.scaleBand().domain(genres).range([0, width]);
-    const yScale = d3.scaleBand().domain(years).range([0, height]);
+    const xScale = d3.scaleBand().domain(years).range([0, width]);
+    const yScale = d3.scaleBand().domain(genres).range([0, height]);
 
     // colors
     const colorScale = d3.scaleSequential(d3.interpolateReds).domain([0, d3.max(data, (d) => +d.Stream)]);
@@ -42,8 +42,8 @@ d3.csv('v3.csv').then((data) => {
 
     rectGroup
         .append('rect')
-        .attr('x', (d) => xScale(d.Genre))
-        .attr('y', (d) => yScale(d.Year))
+        .attr('x', (d) => xScale(d.Year))
+        .attr('y', (d) => yScale(d.Genre))
         .attr('width', xScale.bandwidth())
         .attr('height', yScale.bandwidth())
         .style('fill', (d) => colorScale(+d.Stream))
@@ -98,27 +98,28 @@ d3.csv('v3.csv').then((data) => {
         .attr('x', width / 2)
         .attr('y', height + margin.top)
         .style('text-anchor', 'middle')
-        .text('Genre');
+        .text('Year');
+
+    const yAxis = svg.append('g').call(d3.axisLeft(yScale));
+    yAxis.selectAll('text')
+        .attr('x', -margin.left)
+        .style('text-anchor', 'start')
+        .text((d) => d);
 
     // y axis label
     svg.append('text')
         .attr('x', 0)
         .attr('y', -margin.top / 2)
         .style('text-anchor', 'middle')
-        .text('Year');
-
-    svg
-        .append('g')
-        .attr('transform', `translate(0, ${height})`)
-        .call(d3.axisBottom(xScale));
+        .text('Genre');
 
     // Create the y-axis with ticks for every 5 years
     const tickValues = years.filter((year) => year % 5 === 0);
-    svg.append('g').call(d3.axisLeft(yScale).tickValues(tickValues));
+    const xAxis = svg.append('g').call(d3.axisBottom(xScale).tickValues(tickValues))
+        .attr('transform', `translate(0, ${height})`);
 
-    const yAxis = svg.append('g').call(d3.axisLeft(yScale).tickValues(tickValues));
 
-    yAxis.selectAll('.tick text').on('click', function(event, d) {
+    xAxis.selectAll('.tick text').on('click', function(event, d) {
         const selectedYear = this.textContent;
 
         console.log(selectedYear);
@@ -140,7 +141,7 @@ d3.csv('v3.csv').then((data) => {
             });
 
         // Update the highlighted class
-        yAxis.selectAll('.tick text')
+        xAxis.selectAll('.tick text')
             .classed('highlighted', (d) => selectedYears.includes(d));
 
         isGenreClicked = false;
@@ -148,5 +149,4 @@ d3.csv('v3.csv').then((data) => {
     });
 
     let selectedYears = [];
-
 });
