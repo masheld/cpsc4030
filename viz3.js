@@ -3,15 +3,15 @@ const margin = {
     top: 50,
     right: 50,
     bottom: 50,
-    left: 90
+    left: 50
 };
 
-const width = 1400 - margin.left - margin.right;
-const height = 400 - margin.top - margin.bottom;
+const width = 750 - margin.left - margin.right;
+const height = 450 - margin.top - margin.bottom;
 
 const svg = d3
     .select('#heatmap')
-    .append('svg')
+    // .append('svg')
     .attr('width', width + margin.left + margin.right)
     .attr('height', height + margin.top + margin.bottom)
     .append('g')
@@ -61,15 +61,35 @@ d3.csv('v3.csv').then((data) => {
             console.log("Genre Selected: " + currentGenre);
             console.log("Year Selected: " + currentYear);
 
-            if (!isGenreClicked && !isYearSelected && selectedYears.length <= 1) {
+            // *********************************
+            // Adjusted to match class names of scatterplot visualization
+            let adjustedGenreString = currentGenre;
+            adjustedGenreString = adjustedGenreString.replace(/\s+/g, '-').replace(/[\/&]+/g, '')
+
+            // Apply opacity change only if the click event is not active
+            if (!isGenreClicked) {
                 svg.selectAll('rect')
                     .style('filter', (d) => (d.Genre === currentGenre) ? 'none' : 'grayscale(1)')
+                // svg.selectAll(`rect[genre="${currentGenre}"]`)   // DELETE LATER
+                //     .style('opacity', 1);
+                d3.selectAll('circle')
+                    .style('fill-opacity', 0);
+                d3.selectAll(`.${adjustedGenreString}`)
+                    .style('fill-opacity', 0.15);
             }
+            // *********************************
+
+            // if (!isGenreClicked && !isYearSelected && selectedYears.length <= 1) { // DELETE LATER
+            //     svg.selectAll('rect')
+            //         .style('filter', (d) => (d.Genre === currentGenre) ? 'none' : 'grayscale(1)')
+            // }
         })
         .on('mouseout', function(event, d) {
             if (!isGenreClicked && !isYearSelected && selectedYears.length <= 1) {
                 svg.selectAll('rect')
                     .style('filter', 'none')
+                d3.selectAll('circle')
+                    .style('fill-opacity', 0.15);
             }
         })
         .on('click', function(event, d) {
@@ -82,14 +102,22 @@ d3.csv('v3.csv').then((data) => {
             }
 
             const currentGenre = d3.select(this).select('rect').attr('genre');
+            let adjustedGenreString = currentGenre;
+            adjustedGenreString = adjustedGenreString.replace(/\s+/g, '-').replace(/[\/&]+/g, '')
             isGenreClicked = !isGenreClicked;
 
             if (isGenreClicked) {
                 svg.selectAll('rect')
                     .style('filter', (d) => (d.Genre === currentGenre) ? 'none' : 'grayscale(1)')
+                d3.selectAll('circle')
+                    .style('fill-opacity', 0);
+                d3.selectAll(`.${adjustedGenreString}`)
+                    .style('fill-opacity', 0.15);
             } else {
                 svg.selectAll('rect')
                     .style('filter', 'none')
+                d3.selectAll('circle')
+                    .style('fill-opacity', 0.15);
             }
         });
 
