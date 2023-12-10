@@ -4,8 +4,8 @@ d3.csv("viz2.csv").then(function(dataset) {
 
     }
     var dimensions = {
-        width: 1000,
-        height: 600,
+        width: 650,
+        height: 350,
         margin: {
             top: 10,
             bottom: 50,
