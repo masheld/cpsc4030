@@ -51,7 +51,7 @@ d3.csv("viz2.csv").then(function(dataset) {
 
     var colorScale = d3.scaleOrdinal()
         .domain(keys)
-        .range(["#4682b4", "#FFA500", "#fff2ae", "#800080", "#Ff0000", "#008000", "#f1e2cc", "#cccccc"]);
+        .range(["#4682b4", "#FFA500", "#d3d3d3", "#800080", "#Ff0000", "#008000", "#f1e2cc", "#cccccc"]);
 
     originalChart();
 
@@ -139,6 +139,12 @@ d3.csv("viz2.csv").then(function(dataset) {
             .attr("text-anchor", "end")
             .text("Year");
 
+
+        svg.append('text')
+            .attr('x', dimensions.width / 2)
+            .attr('y', 350)
+            .style('text-anchor', 'middle')
+            .text('Year');
 
         const yAxis = svg.append("g")
             .attr("class", "y-axis")
