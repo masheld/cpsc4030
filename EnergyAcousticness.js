@@ -30,6 +30,20 @@ d3.csv("condensedGenresFixed.csv").then(
         let opacity = 0.15
         let radius = 3
 
+        var tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0)
+            .style("position", "absolute")
+            .style("text-align", "center")
+            .style("padding", "8px")
+            .style("font", "12px sans-serif")
+            .style("background", "white")
+            .style("border", "solid 1px #aaa")
+            .style("border-radius", "4px")
+            .style("pointer-events", "none")
+
+        
+
         // graphNum refers to the order of the graphs (1-5)
         // endpoint refers to which endpoint of the range the value is (1=lower, 2=upper)
         function calcAxisWidth(graphNum, endpoint) {
@@ -79,7 +93,7 @@ d3.csv("condensedGenresFixed.csv").then(
                       .attr("fill", "steelblue")
                       .attr("fill-opacity", opacity)
                       .attr("class", d => "acousticGraph acousticDots " + 
-                            d.Title.replace(/\s+/g, '-').replace(/[,.'\/&\(\)]+/g, '') + 
+                            d.Title.replace(/\s+/g, '-').replace(/[,.':\/&\(\)]+/g, '') + 
                             " " + d.TopGenre.replace(/\s+/g, '-').replace(/[\/&]+/g, '') + 
                             " " + d.Year) // Replace or remove non alphanumeric characters 
 
@@ -229,10 +243,26 @@ d3.csv("condensedGenresFixed.csv").then(
             .text("Liveness")
             .attr("id", "liveLabel")
 
+        svg.append("text")
+            .attr("class", "yLabel")
+            .attr("text-anchor", "end")
+            .attr("y", 6)
+            .attr("dy", ".75em")
+            .attr("transform", "rotate(-90)") // Rotate the text by -90 degrees
+            .attr("x", 0 - ((dimensions.height/2)-dimensions.margin.top-dimensions.margin.bottom))
+            .text("Energy"); 
+        
+
         // Highlight on mouseover effect
         d3.selectAll('circle').on('mouseover', (event,d) => {
             d3.select(event.srcElement).style('stroke', 'black')
-                                   .style('stroke-width', 1.25)
+                .style('stroke-width', 1.25)
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html("Title: " + d.Title + "<br/> Artist: " + d.Artist)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 28) + "px");
         })
     
         // Remove highlight on mouseover effect
@@ -241,6 +271,9 @@ d3.csv("condensedGenresFixed.csv").then(
 
             let tempList = mouseoutCircle.className.baseVal.split(' ');
             tempList = tempList.map(className => "." + className);
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
             
             // For if the user hasn't clicked a circle yet (meaning classList is null)
             if (!classList) {
@@ -275,7 +308,7 @@ d3.csv("condensedGenresFixed.csv").then(
                                           .style('fill-opacity', '1,0');
                 previousTarget = currentTarget;
             }
-            // Remove previous selection
+            // Selected same circle again, remove selection
             else {
                 d3.selectAll('circle').style('stroke-width', 0) 
                                       .style('fill-opacity', opacity);
@@ -344,7 +377,6 @@ d3.csv("condensedGenresFixed.csv").then(
                 xAxisGen.ticks(20);
                 d3.select("#acousticGraph").call(xAxisGen)
 
-                // ***************************************
                 // Add additional ticks
                 const minorTickValues = d3.range(0, 1.01, 0.01).filter(d => d % 0.1 !== 0); // Values for minor ticks, excluding major tick values
 
@@ -360,7 +392,6 @@ d3.csv("condensedGenresFixed.csv").then(
                     .style("stroke-width", 1);
                     
                 d3.selectAll(".minor-tick").style("display", null);
-                // ***************************************
                 d3.selectAll(".acousticDots").attr("cx", d => acousticScale(acousticAccessor(d)))
                 d3.select("#acousticLabel").attr("x", dimensions.width/2)
             }
