@@ -58,31 +58,26 @@ d3.csv('v3.csv').then((data) => {
         .on('mouseover', function(event, d) {
             const currentGenre = d3.select(this).select('rect').attr('genre');
             const currentYear = d3.select(this).select('rect').attr('year');
-            console.log("Genre Selected: " + currentGenre);
-            console.log("Year Selected: " + currentYear);
 
-            // *********************************
             // Adjusted to match class names of scatterplot visualization
             let adjustedGenreString = currentGenre;
             adjustedGenreString = adjustedGenreString.replace(/\s+/g, '-').replace(/[\/&]+/g, '')
+            let opacityCheck = d3.select(event.target).style('opacity')
 
             // Apply opacity change only if the click event is not active
             if (!isGenreClicked) {
                 svg.selectAll('rect')
                     .style('filter', (d) => (d.Genre === currentGenre) ? 'none' : 'grayscale(1)')
-                // svg.selectAll(`rect[genre="${currentGenre}"]`)   // DELETE LATER
-                //     .style('opacity', 1);
-                d3.selectAll('circle')
-                    .style('fill-opacity', 0);
-                d3.selectAll(`.${adjustedGenreString}`)
-                    .style('fill-opacity', 0.15);
+                // if(selectedYears.length >= 1 && opacityCheck != 0) {
+                //     d3.selectAll('circle').selectAll(`.${adjustedGenreString}, .${d.Year}`) // Come back to
+                // }
+                if(opacityCheck != 0) {
+                    d3.selectAll('circle')
+                        .style('fill-opacity', 0);
+                    d3.selectAll(`.${adjustedGenreString}`)
+                        .style('fill-opacity', 0.15);
+                }
             }
-            // *********************************
-
-            // if (!isGenreClicked && !isYearSelected && selectedYears.length <= 1) { // DELETE LATER
-            //     svg.selectAll('rect')
-            //         .style('filter', (d) => (d.Genre === currentGenre) ? 'none' : 'grayscale(1)')
-            // }
         })
         .on('mouseout', function(event, d) {
             if (!isGenreClicked && !isYearSelected && selectedYears.length <= 1) {
@@ -106,13 +101,34 @@ d3.csv('v3.csv').then((data) => {
             adjustedGenreString = adjustedGenreString.replace(/\s+/g, '-').replace(/[\/&]+/g, '')
             isGenreClicked = !isGenreClicked;
 
+            // Apply opacity change only if the click event is not active
             if (isGenreClicked) {
                 svg.selectAll('rect')
                     .style('filter', (d) => (d.Genre === currentGenre) ? 'none' : 'grayscale(1)')
-                d3.selectAll('circle')
-                    .style('fill-opacity', 0);
-                d3.selectAll(`.${adjustedGenreString}`)
-                    .style('fill-opacity', 0.15);
+                
+                // Filter circles just by genre, no year is selected
+                if(!isYearSelected) {
+                    d3.selectAll('circle')
+                        .style('fill-opacity', 0);
+                    d3.selectAll(`.${adjustedGenreString}`)
+                        .style('fill-opacity', 0.15);
+                }
+                // Filter circles by genre and year(s), a genre and year are selected
+                else {
+                    d3.selectAll('[fill-opacity="0.15"]').style('fill', 'black');
+                    // d3.selectAll('circle')
+                    //     .style('fill-opacity', d => {
+                    //         if(d3.select(this).classed(adjustedGenreString) && selectedYears.includes(d.Year)) {
+                    //             return 0.15;
+                    //         } else {
+                    //             return 0;
+                    //         }
+                    //     });
+                    // d3.selectAll('circle')
+                    //     .style('fill-opacity', 0);
+                    // d3.selectAll(`.${adjustedGenreString}`)
+                    //     .style('fill-opacity', 0.15);
+                }
             } else {
                 svg.selectAll('rect')
                     .style('filter', 'none')
@@ -142,9 +158,13 @@ d3.csv('v3.csv').then((data) => {
         .text('Genre');
 
     // Create the y-axis with ticks for every 5 years
-    const tickValues = years.filter((year) => year % 5 === 0);
+    const tickValues = years.filter((year) => year % 1 === 0);
     const xAxis = svg.append('g').call(d3.axisBottom(xScale).tickValues(tickValues))
         .attr('transform', `translate(0, ${height})`);
+    
+    xAxis.selectAll('.tick text')
+        .attr("transform", "rotate(-70)")
+        .style('text-anchor', 'end')
 
 
     xAxis.selectAll('.tick text').on('click', function(event, d) {
@@ -167,6 +187,19 @@ d3.csv('v3.csv').then((data) => {
             .style('opacity', (d) => {
                 return (selectedYears.length === 0 || selectedYears.includes(d.Year)) ? 1 : 0;
             });
+        
+        d3.selectAll('circle')
+            .transition()
+            .duration(500)
+            .style('fill-opacity', d => {
+                return (selectedYears.length === 0 || selectedYears.includes(d.Year)) ? 0.15 : 0;
+            });
+
+        // Remove stroke from any clicked circles if they don't belong to the selected year(s)
+        d3.selectAll('[stroke-width = "1.25"]')
+            .style('stroke-width', d => {
+                return (selectedYears.length === 0 || selectedYears.includes(d.Year)) ? 1.25 : 0;
+            })
 
         // Update the highlighted class
         xAxis.selectAll('.tick text')
