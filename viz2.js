@@ -3,6 +3,7 @@ d3.csv("viz2.csv").then(function(dataset) {
         d3.select("#chartSvg").remove();
 
     }
+
     var dimensions = {
         width: 650,
         height: 350,
@@ -17,8 +18,17 @@ d3.csv("viz2.csv").then(function(dataset) {
 
     dataset.forEach(function (d) {
         d.Year = +d.Year;
+        d.Acousticness = +d.Acousticness;
+        d.Danceability = +d.Danceability;
+        d.Energy = +d.Energy;
+        d.Liveness = +d.Liveness;
+        d.Speechiness = +d.Speechiness;
+        d.Valence = +d.Valence;
     });
     dataset.sort((a, b) => a.Year - b.Year);
+
+
+    var keys = dataset.columns.slice(2);
 
     var xScale = d3.scaleBand()
         .domain(dataset.map(d => d.Year.toString()))
@@ -32,27 +42,39 @@ d3.csv("viz2.csv").then(function(dataset) {
         xTicks.push(year.toString());
     }
 
-    var keys = dataset.columns.slice(2);
-
     var maxSum = d3.max(dataset, d => d3.sum(keys, key => +d[key]));
-
+    console.log(maxSum)
     var yScale = d3.scaleLinear()
         .domain([0, maxSum])
         .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]);
 
 
-
     var colorScale = d3.scaleOrdinal()
         .domain(keys)
-        .range(["#b3e2cd", "#fdcdac", "#cbd5e8", "#f4cae4", "#e6f5c9", "#fff2ae", "#f1e2cc", "#cccccc"]);
+        .range(["#4682b4", "#FFA500", "#d3d3d3", "#800080", "#Ff0000", "#008000", "#f1e2cc", "#cccccc"]);
 
     originalChart();
 
-
     function originalChart() {
+        var keys = Object.keys(dataset[0]).filter(key => key !== 'Year');
+
+        var groupedData = d3.group(dataset, d => d.Year);
+
+        var averageData = Array.from(groupedData.entries()).map(([year, yearData]) => {
+            var averages = {};
+            keys.forEach(function (key) {
+                averages[key] = d3.mean(yearData, function (data) {
+                    return +data[key];
+                });
+            });
+            return { Year: +year, ...averages };
+        });
+
+        console.log(averageData);
+
         var stackedData = d3.stack()
             .keys(keys)
-            (dataset);
+            (averageData);
         // Create a new SVG
         var svg = d3.select("#stackedBarChart")
             .append("svg")
@@ -106,7 +128,6 @@ d3.csv("viz2.csv").then(function(dataset) {
 
                 // Filter the dataset for the selected year
                 const filteredData = dataset.filter(item => item.Year === selectedYear);
-                console.log(filteredData);
                 updateChart(filteredData);
             })
             .selectAll("text")
@@ -118,6 +139,12 @@ d3.csv("viz2.csv").then(function(dataset) {
             .attr("text-anchor", "end")
             .text("Year");
 
+
+        svg.append('text')
+            .attr('x', dimensions.width / 2)
+            .attr('y', 350)
+            .style('text-anchor', 'middle')
+            .text('Year');
 
         const yAxis = svg.append("g")
             .attr("class", "y-axis")
@@ -133,6 +160,7 @@ d3.csv("viz2.csv").then(function(dataset) {
             .text("Value");
 
     }
+
     // Color Key
     var colorKey = d3.select("#colorKey")
         .append("svg")
@@ -165,8 +193,8 @@ d3.csv("viz2.csv").then(function(dataset) {
         .text(function (d) {
             return d;
         });
-    function updateChart(filteredData) {
 
+    function updateChart(filteredData) {
 
         var keys = dataset.columns.slice(2);
 
@@ -174,23 +202,26 @@ d3.csv("viz2.csv").then(function(dataset) {
             .domain(filteredData.map(d => d.Year.toString()))
             .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
 
-
         var x1 = d3.scaleBand()
             .domain(keys)
             .range([0, x0.bandwidth()])
 
-
-
-        var cumulativeSums = {};
-        keys.forEach(function (key) {
-            cumulativeSums[key] = d3.cumsum(filteredData.map(d => +d[key]));
+        var averageData = filteredData.map(d => {
+            var averages = {};
+            keys.forEach(function (key) {
+                averages[key] = d3.mean(filteredData, d => +d[key]);
+            });
+            return {Year: d.Year, ...averages};
         });
-        var maxSum = d3.max(keys.map(key => d3.max(cumulativeSums[key])));
+
+        var maxAverage = d3.max(keys.map(key => d3.max(averageData.map(d => +d[key]))));
 
         var yScale = d3.scaleLinear()
-            .domain([0, maxSum])
+            .domain([0, maxAverage])
             .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]);
+
         resetChart();
+
         var svg = d3.select("#stackedBarChart")
             .append("svg")
             .attr("width", dimensions.width)
@@ -200,16 +231,16 @@ d3.csv("viz2.csv").then(function(dataset) {
         var svg = d3.select("#chartSvg");
 
         var bars = svg.selectAll(".bar")
-            .data(filteredData);
+            .data(averageData);
 
         var text = svg.append('text')
             .attr("id", 'topbartext')
-            .attr("x", dimensions.width / 2)
+            .attr("x", 750)
             .attr("y", 15)
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
             .attr("font-family", "sans-serif")
-            .text("Value of Highlighted Variable: 0")
+            .text("Average Value: 0");
 
         var newBars = bars.enter().append("g")
             .attr("class", "bar")
@@ -218,20 +249,21 @@ d3.csv("viz2.csv").then(function(dataset) {
         keys.forEach(function (key) {
             newBars.append("rect")
                 .attr("x", d => x1(key))
-                .attr("y", d => yScale(d3.sum(filteredData, d => +d[key])))
+                .attr("y", d => yScale(+d[key]))
                 .attr("width", x1.bandwidth())
-                .attr("height", d => dimensions.height - dimensions.margin.bottom - yScale(d3.sum(filteredData, d => +d[key])))
+                .attr("height", d => dimensions.height - dimensions.margin.bottom - yScale(+d[key]))
                 .attr("fill", colorScale(key))
                 .on('mouseover', function (event) {
+                    const f = d3.format(".2f");
                     d3.select(this)
                         .style('stroke', 'black')
                         .style('stroke-width', 2);
-                    text.text("Sum of Values for " + key + ": " + d3.sum(filteredData, d => +d[key]));
+                    text.text("Average Value for " + key + ": " + f(d3.mean(averageData, d => +d[key])));
                 })
                 .on('mouseout', function () {
                     d3.select(this)
                         .style('stroke-width', 0);
-                    text.text("Sum of Values: 0");
+                    text.text("Average Value: 0");
                 });
         });
 
@@ -240,7 +272,7 @@ d3.csv("viz2.csv").then(function(dataset) {
             .duration(500)
             .attr("transform", d => `translate(${x0(d.Year.toString())},0)`);
 
-// Update X and Y axes
+        // Update X and Y axes
         const xAxis = svg.append("g")
             .attr("class", "x-axis")
             .attr("transform", `translate(${dimensions.margin.left}, ${dimensions.height - dimensions.margin.bottom})`)
@@ -254,7 +286,6 @@ d3.csv("viz2.csv").then(function(dataset) {
                 originalChart();
             });
 
-
         const yAxis = svg.append("g")
             .attr("transform", `translate(${dimensions.margin.left}, 0)`)
             .call(d3.axisLeft(yScale))
@@ -264,8 +295,5 @@ d3.csv("viz2.csv").then(function(dataset) {
             .attr("text-anchor", "end")
             .text(d => d);
 
-
     }
-
-
 });
