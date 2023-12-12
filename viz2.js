@@ -5,10 +5,10 @@ d3.csv("viz2.csv").then(function(dataset) {
     }
 
     var dimensions = {
-        width: 650,
+        width: 750,
         height: 350,
         margin: {
-            top: 10,
+            top: 20,
             bottom: 50,
             right: 10,
             left: 100
@@ -129,6 +129,21 @@ d3.csv("viz2.csv").then(function(dataset) {
                 // Filter the dataset for the selected year
                 const filteredData = dataset.filter(item => item.Year === selectedYear);
                 updateChart(filteredData);
+
+                // Append text to display the year selected
+                d3.select("#stackedBarChart").append('text')
+                    .text(`${selectedYear}`)
+                    .attr('x', dimensions.width/2)
+                    .attr('y', dimensions.margin.top)
+                    .attr('id', 'yearLabel');
+
+                // Only display scatterplot points associated with selected year
+                d3.selectAll('circle')
+                    .transition()
+                    .duration(250)
+                    .style('fill-opacity', d => {
+                        return (d.Year == selectedYear) ? 0.15 : 0;
+                    });
             })
             .selectAll("text")
             .append("text")
@@ -282,6 +297,11 @@ d3.csv("viz2.csv").then(function(dataset) {
             .attr("fill", "black")
             .attr("text-anchor", "middle ")
             .on("click", function (event, d) {
+                d3.selectAll('#yearLabel').text("");
+                d3.selectAll('circle')
+                    .transition()
+                    .duration(250)
+                    .style('fill-opacity', 0.15);
                 resetChart()
                 originalChart();
             });

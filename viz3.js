@@ -6,8 +6,8 @@ const margin = {
     left: 50
 };
 
-const width = 750 - margin.left - margin.right;
-const height = 450 - margin.top - margin.bottom;
+const width = 650 - margin.left - margin.right;
+const height = 350 - margin.top - margin.bottom;
 
 const svg = d3
     .select('#heatmap')
